@@ -3,12 +3,14 @@ const fs = require('node:fs');
 const { createClient } = require('@libsql/client');
 
 const dataDir = path.join(__dirname, '..', 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-
 const dbPath = path.join(dataDir, 'dukon.db');
 const isRemote = Boolean(process.env.TURSO_DATABASE_URL);
+
+// Vercel kabi serverless muhitlarda fayl tizimi faqat o'qish uchun ochiq (mkdir ishlamaydi) —
+// shuning uchun lokal papkani faqat haqiqatan ham lokal faylga yozadigan holatda yaratamiz.
+if (!isRemote && !fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
 
 const client = isRemote
   ? createClient({ url: process.env.TURSO_DATABASE_URL, authToken: process.env.TURSO_AUTH_TOKEN })
