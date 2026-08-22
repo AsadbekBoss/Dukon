@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Do'kon Nazorat Tizimi — Kirish</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="logo-emoji">🏪</div>
+      <h1>Do'kon Nazorat Tizimi</h1>
+      <p class="subtitle">Davom etish uchun tizimga kiring</p>
+
+      <div id="errorBox" class="error-msg"></div>
+
+      <form id="loginForm">
+        <label for="login">Login</label>
+        <input type="text" id="login" name="login" autocomplete="username" required />
+
+        <label for="parol">Parol</label>
+        <input type="password" id="parol" name="parol" autocomplete="current-password" required />
+
+        <button type="submit" class="btn-block" id="submitBtn">Kirish</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>

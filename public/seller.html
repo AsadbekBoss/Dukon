@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sotuvchi Panel — Do'kon Nazorat Tizimi</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>🏪 Do'kon Nazorat — Sotuvchi</h1>
+    <div class="user-box">
+      <span id="userName"></span>
+      <button class="btn-secondary btn-sm" id="logoutBtn">Chiqish</button>
+    </div>
+  </header>
+
+  <nav class="app-tabs">
+    <button class="tab-btn active" data-tab="sell">Sotuv qilish</button>
+    <button class="tab-btn" data-tab="mysales">Mening sotuvlarim</button>
+  </nav>
+
+  <main class="app-main">
+
+    <!-- ==================== SOTUV QILISH ==================== -->
+    <section id="tab-sell" class="tab-panel active">
+      <div class="card">
+        <h2>Mahsulot qidirish</h2>
+        <div class="form-grid search-box">
+          <input type="text" id="productSearch" placeholder="Mahsulot nomi bo'yicha qidirish..." />
+          <select id="productCategoryFilter">
+            <option value="">Barcha kategoriyalar</option>
+          </select>
+        </div>
+        <div id="saleErr" class="error-msg"></div>
+        <div class="product-grid" id="productsGrid"></div>
+      </div>
+    </section>
+
+    <!-- ==================== MENING SOTUVLARIM ==================== -->
+    <section id="tab-mysales" class="tab-panel">
+      <div class="stat-grid" id="mySummaryGrid"></div>
+
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Sotuvlar tarixi</h2>
+          <div class="period-btns" data-target="my-period">
+            <button class="btn-sm active" data-period="today">Bugun</button>
+            <button class="btn-sm" data-period="week">Hafta</button>
+            <button class="btn-sm" data-period="month">Oy</button>
+            <button class="btn-sm" data-period="all">Hammasi</button>
+          </div>
+          <button class="btn-sm export-btn" id="exportMySalesCsv">⬇ CSV yuklab olish</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Sana</th><th>Mahsulot</th><th>Miqdor</th><th>Narx/dona</th><th>Jami</th><th></th></tr>
+            </thead>
+            <tbody id="mySalesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="hint">Do'kon Nazorat Tizimi</footer>
+
+  <!-- Chek shabloni: faqat chop etishda ko'rinadi (printReceipt() orqali to'ldiriladi) -->
+  <div id="receiptArea"></div>
+
+  <!-- Savat paneli: bir nechta mahsulotni bitta xaridorga birga sotish uchun -->
+  <div id="cartPanel" class="cart-panel hidden">
+    <div class="card-row">
+      <h3 style="margin:0">🛒 Savat</h3>
+      <button type="button" class="btn-sm btn-secondary" id="cartClearBtn">Tozalash</button>
+    </div>
+    <div id="cartItemsList"></div>
+  </div>
+  <div id="cartBar" class="cart-bar hidden">
+    <div class="cart-bar-summary" id="cartBarSummary"></div>
+    <div class="cart-bar-actions">
+      <button type="button" class="btn-sm btn-secondary" id="cartToggleBtn">Savatni ko'rish</button>
+      <button type="button" class="btn-sm" id="cartCheckoutBtn">✅ Sotuvni yakunlash</button>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/seller.js"></script>
+</body>
+</html>

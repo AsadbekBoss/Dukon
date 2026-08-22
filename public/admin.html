@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel — Do'kon Nazorat Tizimi</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <h1>🏪 Do'kon Nazorat — Admin</h1>
+    <div class="user-box">
+      <span id="userName"></span>
+      <button class="btn-secondary btn-sm" id="logoutBtn">Chiqish</button>
+    </div>
+  </header>
+
+  <nav class="app-tabs">
+    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="products">Mahsulotlar</button>
+    <button class="tab-btn" data-tab="sellers">Sotuvchilar</button>
+  </nav>
+
+  <main class="app-main">
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <section id="tab-dashboard" class="tab-panel active">
+      <div id="lowStockBanner" class="alert-banner hidden"></div>
+
+      <div class="stat-grid" id="summaryGrid"></div>
+
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Kunlik tushum (oxirgi 30 kun)</h2>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-sm export-btn" id="exportProductsCsv">⬇ Mahsulotlar CSV</button>
+            <button class="btn-sm export-btn" id="exportSalesCsv">⬇ Sotuvlar CSV</button>
+            <button class="btn-sm export-btn" id="downloadBackup" title="Butun ma'lumotlar bazasini yuklab olish">💾 Bazani zaxiralash</button>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>⚠️ Kam qoldiqli mahsulotlar</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Nomi</th><th>Kategoriya</th><th>Qoldiq</th><th>Min qoldiq</th></tr>
+            </thead>
+            <tbody id="lowStockBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Sotuvchilar bo'yicha hisobot</h2>
+          <div class="period-btns" data-target="seller-period">
+            <button class="btn-sm active" data-period="all">Hammasi</button>
+            <button class="btn-sm" data-period="today">Bugun</button>
+            <button class="btn-sm" data-period="week">Hafta</button>
+            <button class="btn-sm" data-period="month">Oy</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Sotuvchi</th><th>Sotuvlar soni</th><th>Dona</th><th>Tushum</th><th>Foyda</th></tr>
+            </thead>
+            <tbody id="sellerReportBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Eng ko'p sotilgan mahsulotlar</h2>
+          <div class="period-btns" data-target="top-period">
+            <button class="btn-sm active" data-period="all">Hammasi</button>
+            <button class="btn-sm" data-period="today">Bugun</button>
+            <button class="btn-sm" data-period="week">Hafta</button>
+            <button class="btn-sm" data-period="month">Oy</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Mahsulot</th><th>Sotilgan dona</th><th>Tushum</th><th>Foyda</th></tr>
+            </thead>
+            <tbody id="topProductsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== MAHSULOTLAR ==================== -->
+    <section id="tab-products" class="tab-panel">
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Mahsulotlar</h2>
+        </div>
+        <div class="search-box">
+          <input type="text" id="productSearch" placeholder="Barcha kategoriyalardan mahsulot qidirish..." />
+        </div>
+
+        <!-- Kategoriyalar panjarasi (dastlabki ko'rinish) -->
+        <div id="categoryGridView">
+          <div class="category-grid" id="categoryGrid"></div>
+
+          <!-- Yangi/tahrirlanayotgan kategoriya mini-forma -->
+          <div id="newCategoryBox" class="new-category-box hidden">
+            <input type="hidden" id="editCategoryId" />
+            <h3 id="newCategoryTitle" style="margin:0 0 14px">Yangi kategoriya</h3>
+
+            <label>Kategoriya rasmi</label>
+            <div class="image-upload-row">
+              <div class="image-preview" id="newcat_rasm_preview">🗂️</div>
+              <div style="flex:1">
+                <input type="file" id="newcat_rasm_file" accept="image/*" class="hidden" />
+                <input type="file" id="newcat_rasm_camera" accept="image/*" capture="environment" class="hidden" />
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                  <button type="button" class="btn-sm btn-secondary" id="newcat_rasm_pick_file">📁 Galereyadan</button>
+                  <button type="button" class="btn-sm btn-secondary" id="newcat_rasm_pick_camera">📷 Kameradan</button>
+                </div>
+                <button type="button" class="btn-sm btn-secondary" id="newcat_rasm_clear">Rasmni olib tashlash</button>
+              </div>
+            </div>
+
+            <label for="newCategoryName">Kategoriya nomi</label>
+            <input type="text" id="newCategoryName" placeholder="Masalan: Elektronika" />
+
+            <label>Rasm bo'lmasa ko'rinadigan belgi</label>
+            <div class="icon-picker" id="newCategoryIconPicker"></div>
+
+            <div id="newCategoryError" class="error-msg"></div>
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="newCategorySave">Yaratish</button>
+              <button type="button" class="btn-secondary" id="newCategoryCancel">Bekor qilish</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tanlangan kategoriya ichidagi (yoki qidiruv natijasi) mahsulotlar -->
+        <div id="productListView" class="hidden">
+          <div class="card-row">
+            <button type="button" class="btn-sm btn-secondary" id="backToCategories">← Orqaga</button>
+            <div style="flex:1">
+              <div id="categoryContext" class="category-context"></div>
+              <h3 id="currentCategoryTitle" style="margin:0"></h3>
+            </div>
+            <button type="button" class="btn-sm btn-danger hidden" id="deleteCategoryBtn">🗑️ Kategoriyani o'chirish</button>
+            <button type="button" class="btn-sm" id="showAddProductForm">+ Mahsulot qo'shish</button>
+          </div>
+
+          <form id="productForm" class="hidden">
+            <input type="hidden" id="productId" />
+
+            <!-- 1. Rasm -->
+            <div class="form-section">
+              <div class="form-section-title">1. Rasm</div>
+              <div class="image-upload-row">
+                <div class="image-preview" id="p_rasm_preview">📦</div>
+                <div style="flex:1">
+                  <input type="file" id="p_rasm_file" accept="image/*" class="hidden" />
+                  <input type="file" id="p_rasm_camera" accept="image/*" capture="environment" class="hidden" />
+                  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                    <button type="button" class="btn-sm btn-secondary" id="p_rasm_pick_file">📁 Galereyadan tanlash</button>
+                    <button type="button" class="btn-sm btn-secondary" id="p_rasm_pick_camera">📷 Kameradan olish</button>
+                  </div>
+                  <button type="button" class="btn-sm btn-secondary" id="p_rasm_clear">Rasmni olib tashlash</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Nomi va kategoriya -->
+            <div class="form-section">
+              <div class="form-section-title">2. Nomi va kategoriya</div>
+              <label for="p_nomi">Mahsulot nomi</label>
+              <input type="text" id="p_nomi" placeholder="Masalan: Daftar 48 varaq" required />
+
+              <label for="p_kategoriya">Kategoriya</label>
+              <input type="text" id="p_kategoriya" list="categoryDatalist" placeholder="Kategoriya nomi" />
+              <datalist id="categoryDatalist"></datalist>
+
+              <label for="p_ichki_guruh">Ichki guruh (ixtiyoriy) — masalan "Ruchkalar"</label>
+              <input type="text" id="p_ichki_guruh" list="subgroupDatalist" placeholder="Bir xil turdagi mahsulotlarni guruhlash uchun" />
+              <datalist id="subgroupDatalist"></datalist>
+            </div>
+
+            <!-- 3. Narx -->
+            <div class="form-section">
+              <div class="form-section-title">3. Narx</div>
+              <label for="p_tannarx">Tannarx — sizga qancha turdi (so'm)</label>
+              <input type="number" id="p_tannarx" min="0" step="1" placeholder="0" required />
+
+              <label>Ustama foiz — qancha foyda qo'shmoqchisiz?</label>
+              <div class="percent-chips" id="percentChips"></div>
+              <input type="number" id="p_foiz" min="0" step="0.1" placeholder="Yoki foizni qo'lda kiriting" />
+
+              <label for="p_sotish">Sotish narxi (so'm) — mijozdan olinadigan narx</label>
+              <input type="number" id="p_sotish" min="0" step="1" placeholder="0" required />
+
+              <div class="profit-preview" id="profitPreview">Tannarx va narxni kiriting — foyda avtomatik hisoblanadi</div>
+            </div>
+
+            <!-- 4. Miqdor -->
+            <div class="form-section">
+              <div class="form-section-title">4. Miqdor</div>
+              <label for="p_miqdor">Nechta dona bor / keldi?</label>
+              <input type="number" id="p_miqdor" min="0" step="1" placeholder="0" required />
+            </div>
+
+            <details class="advanced-details">
+              <summary>⚙️ Qo'shimcha sozlama (ixtiyoriy)</summary>
+              <label for="p_min_miqdor" style="margin-top:10px">Kam qoldiq ogohlantirish chegarasi</label>
+              <input type="number" id="p_min_miqdor" min="0" step="1" value="5" />
+            </details>
+
+            <div id="productError" class="error-msg"></div>
+            <div style="display:flex; gap:8px;">
+              <button type="submit" id="productSubmitBtn">Saqlash</button>
+              <button type="button" class="btn-secondary" id="cancelProductEdit">Bekor qilish</button>
+            </div>
+          </form>
+
+          <!-- Ichki guruhlar panjarasi (kategoriyada guruhlar mavjud bo'lsagina ko'rinadi) -->
+          <div id="subgroupGridView" class="hidden">
+            <div class="category-grid" id="subgroupGrid"></div>
+          </div>
+
+          <div id="productTableWrap">
+            <div class="product-grid" id="productsBody"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SOTUVCHILAR ==================== -->
+    <section id="tab-sellers" class="tab-panel">
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Yangi foydalanuvchi qo'shish</h2>
+          <button class="btn-sm btn-secondary" id="toggleUserForm">Formani ko'rsatish</button>
+        </div>
+        <form id="userForm" class="hidden">
+          <input type="hidden" id="userId" />
+          <div class="form-grid">
+            <div>
+              <label for="u_ism">To'liq ism</label>
+              <input type="text" id="u_ism" required />
+            </div>
+            <div>
+              <label for="u_login">Login</label>
+              <input type="text" id="u_login" required />
+            </div>
+            <div>
+              <label for="u_parol">Parol <span id="parolHint" style="font-weight:400"></span></label>
+              <input type="password" id="u_parol" />
+            </div>
+            <div>
+              <label for="u_rol">Rol</label>
+              <select id="u_rol">
+                <option value="sotuvchi">Sotuvchi</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <div id="userError" class="error-msg"></div>
+          <div style="display:flex; gap:8px;">
+            <button type="submit" id="userSubmitBtn">Saqlash</button>
+            <button type="button" class="btn-secondary" id="cancelUserEdit">Bekor qilish</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Foydalanuvchilar ro'yxati</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Ism</th><th>Login</th><th>Rol</th><th>Yaratilgan</th><th>Amallar</th></tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="hint">Do'kon Nazorat Tizimi — barcha ma'lumotlar lokal SQLite bazasida saqlanadi</footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

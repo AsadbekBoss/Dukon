@@ -1,0 +1,20 @@
+{
+  "name": "dukon-nazorat",
+  "version": "1.0.0",
+  "description": "Do'kon uchun mahsulot va tushum nazorati tizimi",
+  "main": "server/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "dev": "node --env-file-if-exists=.env --watch server/index.js",
+    "seed": "node --env-file-if-exists=.env server/seed.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
