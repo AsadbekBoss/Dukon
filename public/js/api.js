@@ -26,7 +26,9 @@ async function api(path, options = {}) {
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
-  if (res.status === 401) {
+  // Login so'rovining o'zi 401 qaytarsa (login/parol xato), bu sessiya muddati
+  // tugashi emas — shunchaki xato xabarini oddiy tarzda ko'rsatish kerak.
+  if (res.status === 401 && path !== '/auth/login') {
     clearSession();
     window.location.href = '/index.html';
     throw new Error('Tizimga qayta kirish kerak');

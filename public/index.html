@@ -7,22 +7,39 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <div class="login-wrap">
-    <div class="login-card">
-      <div class="logo-emoji">🏪</div>
-      <h1>Do'kon Nazorat Tizimi</h1>
+  <div class="login-wrap login-wrap-night">
+    <div class="night-scene" aria-hidden="true">
+      <div class="stars"></div>
+      <div class="mountains-back"></div>
+      <div class="treeline-front"></div>
+    </div>
+
+    <div class="login-card glass">
+      <h1>🏪 Do'kon Nazorat</h1>
       <p class="subtitle">Davom etish uchun tizimga kiring</p>
 
       <div id="errorBox" class="error-msg"></div>
 
       <form id="loginForm">
-        <label for="login">Login</label>
-        <input type="text" id="login" name="login" autocomplete="username" required />
+        <label class="sr-only" for="login">Login</label>
+        <div class="pill-input">
+          <input type="text" id="login" name="login" placeholder="Login" autocomplete="username" required />
+          <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+          </svg>
+        </div>
 
-        <label for="parol">Parol</label>
-        <input type="password" id="parol" name="parol" autocomplete="current-password" required />
+        <label class="sr-only" for="parol">Parol</label>
+        <div class="pill-input">
+          <input type="password" id="parol" name="parol" placeholder="Parol" autocomplete="current-password" required />
+          <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+          </svg>
+        </div>
 
-        <button type="submit" class="btn-block" id="submitBtn">Kirish</button>
+        <button type="submit" class="btn-block login-btn" id="submitBtn">Kirish</button>
       </form>
     </div>
   </div>
