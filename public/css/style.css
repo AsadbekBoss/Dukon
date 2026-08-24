@@ -21,6 +21,15 @@
   --shadow: 0 1px 2px rgba(28, 25, 23, 0.05), 0 1px 3px rgba(28, 25, 23, 0.06);
   --shadow-lg: 0 8px 24px rgba(28, 25, 23, 0.10), 0 2px 6px rgba(28, 25, 23, 0.06);
   --shadow-xl: 0 20px 48px rgba(28, 25, 23, 0.16), 0 4px 12px rgba(28, 25, 23, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.7);
+}
+
+.glass-surface {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid var(--glass-border);
 }
 
 * { box-sizing: border-box; }
@@ -28,7 +37,12 @@
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: var(--bg);
+  background:
+    radial-gradient(650px circle at 6% 10%, rgba(13, 148, 136, 0.09), transparent 60%),
+    radial-gradient(550px circle at 96% 15%, rgba(202, 138, 4, 0.08), transparent 55%),
+    radial-gradient(600px circle at 50% 100%, rgba(13, 148, 136, 0.06), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -262,9 +276,9 @@ input[type="number"],
 input[type="date"],
 select {
   width: 100%;
-  padding: 11px 13px;
+  padding: 11px 18px;
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
   margin-bottom: 14px;
   background: #fff;
   color: var(--text);
@@ -280,8 +294,8 @@ input:focus, select:focus {
 button {
   cursor: pointer;
   border: none;
-  border-radius: var(--radius-sm);
-  padding: 11px 18px;
+  border-radius: 999px;
+  padding: 11px 20px;
   font-weight: 600;
   font-size: 14.5px;
   background: var(--primary);
@@ -298,7 +312,7 @@ button.btn-danger { background-image: none; background: var(--danger); box-shado
 button.btn-danger:hover { background: var(--danger-dark); box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3); }
 button.btn-secondary { background-image: none; background: #f1efe9; color: var(--text); box-shadow: none; }
 button.btn-secondary:hover { background: #e7e2da; box-shadow: none; transform: none; }
-button.btn-sm { padding: 7px 12px; font-size: 13px; }
+button.btn-sm { padding: 7px 16px; font-size: 13px; }
 button:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
 .error-msg {
@@ -404,8 +418,10 @@ button:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important
 }
 
 .card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 22px;
@@ -436,8 +452,10 @@ button:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important
 }
 
 .stat-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 18px;
@@ -567,8 +585,10 @@ tr:last-child td { border-bottom: none; }
 
 .category-card {
   position: relative;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid var(--glass-border);
   border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
@@ -840,8 +860,10 @@ tr:last-child td { border-bottom: none; }
 }
 
 .product-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -973,12 +995,13 @@ tr:last-child td { border-bottom: none; }
 
 .product-card.admin-card .product-card-actions button { padding: 8px; font-size: 12px; }
 
-.qty-input {
+input.qty-input {
   width: 70px;
-  padding: 6px 8px;
+  padding: 8px 6px;
   margin: 0;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 10px;
+  text-align: center;
 }
 
 .actions-cell {
