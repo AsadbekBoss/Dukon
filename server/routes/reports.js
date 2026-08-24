@@ -26,17 +26,34 @@ async function aggregateFrom(fromIso) {
   };
 }
 
-// Bugungi, shu haftalik, shu oylik umumiy ko'rsatkichlar
+// Bugungi, shu haftalik, shu oylik va hammasi vaqt bo'yicha umumiy ko'rsatkichlar
 router.get(
   '/summary',
   asyncHandler(async (req, res) => {
     const now = new Date();
-    const [bugun, hafta, oy] = await Promise.all([
+    const [bugun, hafta, oy, hammasi] = await Promise.all([
       aggregateFrom(startOfDay(now).toISOString()),
       aggregateFrom(startOfWeek(now).toISOString()),
       aggregateFrom(startOfMonth(now).toISOString()),
+      aggregateFrom('0000-01-01T00:00:00.000Z'),
     ]);
-    res.json({ bugun, hafta, oy });
+    res.json({ bugun, hafta, oy, hammasi });
+  })
+);
+
+// Omborda hozir turgan mahsulotlarga sarflangan pul (xarid summasi) va potentsial foyda
+router.get(
+  '/inventory-value',
+  asyncHandler(async (req, res) => {
+    const row = await db.get(`
+      SELECT
+        COALESCE(SUM(tannarx * miqdor), 0) AS jami_xarid,
+        COALESCE(SUM(sotish_narxi * miqdor), 0) AS potentsial_tushum,
+        COALESCE(SUM((sotish_narxi - tannarx) * miqdor), 0) AS potentsial_foyda,
+        COALESCE(SUM(miqdor), 0) AS jami_dona
+      FROM products
+    `);
+    res.json(row);
   })
 );
 
@@ -108,8 +125,9 @@ router.get(
 router.get(
   '/top-products',
   asyncHandler(async (req, res) => {
-    const { period } = req.query;
+    const { period, sort } = req.query;
     const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+    const tartib = sort === 'foyda' ? 'foyda' : 'soni';
     const now = new Date();
     let fromIso = null;
     if (period === 'today') fromIso = startOfDay(now).toISOString();
@@ -126,7 +144,7 @@ router.get(
               SUM(jami_summa - jami_tannarx) AS foyda
        FROM sales ${where}
        GROUP BY mahsulot_nomi
-       ORDER BY soni DESC
+       ORDER BY ${tartib} DESC
        LIMIT ?`,
       [...params, limit]
     );

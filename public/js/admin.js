@@ -50,6 +50,30 @@
       .join('');
   }
 
+  async function loadFinance() {
+    const [summary, inventory] = await Promise.all([api('/reports/summary'), api('/reports/inventory-value')]);
+    const grid = document.getElementById('financeGrid');
+    const bloklar = [
+      ['🛒', 'Jami xarid summasi', inventory.jami_xarid, `${inventory.jami_dona} dona omborda`],
+      ['💵', 'Jami sof foyda (hammasi)', summary.hammasi.foyda, `${summary.hammasi.sotuvlar_soni} ta sotuv`],
+      ['📊', 'Jami tushum (hammasi)', summary.hammasi.tushum, null],
+      ['🔮', "Potentsial foyda (qoldiq to'liq sotilsa)", inventory.potentsial_foyda, null],
+    ];
+    grid.innerHTML = bloklar
+      .map(
+        ([emoji, label, qiymat, sub]) => `
+        <div class="stat-card">
+          <div class="stat-icon">${emoji}</div>
+          <div>
+            <div class="label">${label}</div>
+            <div class="value">${pul(qiymat)}</div>
+            ${sub ? `<div class="sub">${sub}</div>` : ''}
+          </div>
+        </div>`
+      )
+      .join('');
+  }
+
   async function loadTimeseries() {
     const data = await api('/reports/timeseries?days=30');
     const ctx = document.getElementById('revenueChart').getContext('2d');
@@ -140,8 +164,32 @@
       .join('');
   }
 
+  async function loadTopProfit(period) {
+    const params = new URLSearchParams({ sort: 'foyda' });
+    if (period && period !== 'all') params.set('period', period);
+    const data = await api(`/reports/top-products?${params.toString()}`);
+    const body = document.getElementById('topProfitBody');
+    if (!data.mahsulotlar.length) {
+      body.innerHTML = `<tr><td colspan="5" style="color:#6b7280">Ma'lumot topilmadi</td></tr>`;
+      return;
+    }
+    body.innerHTML = data.mahsulotlar
+      .map(
+        (m, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${escapeHtml(m.mahsulot_nomi)}</td>
+          <td>${m.soni}</td>
+          <td>${pul(m.tushum)}</td>
+          <td>${pul(m.foyda)}</td>
+        </tr>`
+      )
+      .join('');
+  }
+
   setupPeriodButtons('[data-target="seller-period"]', loadSellerReport);
   setupPeriodButtons('[data-target="top-period"]', loadTopProducts);
+  setupPeriodButtons('[data-target="top-profit-period"]', loadTopProfit);
 
   async function loadLowStock() {
     const data = await api('/reports/low-stock');
@@ -200,9 +248,11 @@
 
   function refreshDashboard() {
     loadSummary().catch(console.error);
+    loadFinance().catch(console.error);
     loadTimeseries().catch(console.error);
     loadSellerReport('all').catch(console.error);
     loadTopProducts('all').catch(console.error);
+    loadTopProfit('all').catch(console.error);
     loadLowStock().catch(console.error);
   }
 

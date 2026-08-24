@@ -31,6 +31,11 @@
       <div class="stat-grid" id="summaryGrid"></div>
 
       <div class="card">
+        <h2>📦 Ombor va sof foyda (hammasi, boshidan hozirgacha)</h2>
+        <div class="stat-grid" id="financeGrid"></div>
+      </div>
+
+      <div class="card">
         <div class="card-row">
           <h2 style="margin:0">Kunlik tushum (oxirgi 30 kun)</h2>
           <div style="display:flex; gap:8px;">
@@ -92,6 +97,26 @@
               <tr><th>#</th><th>Mahsulot</th><th>Sotilgan dona</th><th>Tushum</th><th>Foyda</th></tr>
             </thead>
             <tbody id="topProductsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">💰 Eng ko'p foyda keltirgan mahsulotlar</h2>
+          <div class="period-btns" data-target="top-profit-period">
+            <button class="btn-sm active" data-period="all">Hammasi</button>
+            <button class="btn-sm" data-period="today">Bugun</button>
+            <button class="btn-sm" data-period="week">Hafta</button>
+            <button class="btn-sm" data-period="month">Oy</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Mahsulot</th><th>Sotilgan dona</th><th>Tushum</th><th>Foyda</th></tr>
+            </thead>
+            <tbody id="topProfitBody"></tbody>
           </table>
         </div>
       </div>
