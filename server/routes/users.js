@@ -8,6 +8,11 @@ const router = express.Router();
 
 router.use(requireAuth, requireRole('admin'));
 
+function ruxsatEtilganRollar(req) {
+  // Faqat "dev" (tizim egasi) boshqa dev hisob yarata/tayinlay oladi
+  return req.user.rol === 'dev' ? ['dev', 'admin', 'sotuvchi'] : ['admin', 'sotuvchi'];
+}
+
 router.get(
   '/',
   asyncHandler(async (req, res) => {
@@ -23,8 +28,8 @@ router.post(
     if (!ism || !login || !parol || !rol) {
       return res.status(400).json({ xato: 'Barcha maydonlar to\'ldirilishi shart' });
     }
-    if (!['admin', 'sotuvchi'].includes(rol)) {
-      return res.status(400).json({ xato: 'Rol noto\'g\'ri (admin yoki sotuvchi)' });
+    if (!ruxsatEtilganRollar(req).includes(rol)) {
+      return res.status(400).json({ xato: 'Rol noto\'g\'ri yoki bu rolni tayinlashga ruxsatingiz yo\'q' });
     }
     const exists = await db.get('SELECT id FROM users WHERE login = ?', [login]);
     if (exists) {
@@ -50,10 +55,15 @@ router.put(
     const target = await db.get('SELECT * FROM users WHERE id = ?', [id]);
     if (!target) return res.status(404).json({ xato: 'Foydalanuvchi topilmadi' });
 
+    // Oddiy admin "dev" hisobiga tegina olmaydi (o'zgartira ham, o'chira ham olmaydi)
+    if (target.rol === 'dev' && req.user.rol !== 'dev') {
+      return res.status(403).json({ xato: 'Bu foydalanuvchini faqat tizim egasi tahrirlay oladi' });
+    }
+
     const { ism, login, parol, rol } = req.body || {};
 
-    if (rol && !['admin', 'sotuvchi'].includes(rol)) {
-      return res.status(400).json({ xato: 'Rol noto\'g\'ri (admin yoki sotuvchi)' });
+    if (rol && !ruxsatEtilganRollar(req).includes(rol)) {
+      return res.status(400).json({ xato: 'Rol noto\'g\'ri yoki bu rolni tayinlashga ruxsatingiz yo\'q' });
     }
 
     if (login && login !== target.login) {
@@ -89,10 +99,21 @@ router.delete(
     const target = await db.get('SELECT * FROM users WHERE id = ?', [id]);
     if (!target) return res.status(404).json({ xato: 'Foydalanuvchi topilmadi' });
 
+    if (target.rol === 'dev' && req.user.rol !== 'dev') {
+      return res.status(403).json({ xato: 'Bu foydalanuvchini faqat tizim egasi o\'chira oladi' });
+    }
+
     if (target.rol === 'admin') {
       const row = await db.get("SELECT COUNT(*) AS soni FROM users WHERE rol = 'admin'");
       if (row.soni <= 1) {
         return res.status(400).json({ xato: 'Tizimda kamida bitta admin qolishi kerak' });
+      }
+    }
+
+    if (target.rol === 'dev') {
+      const row = await db.get("SELECT COUNT(*) AS soni FROM users WHERE rol = 'dev'");
+      if (row.soni <= 1) {
+        return res.status(400).json({ xato: 'Tizimda kamida bitta dev (tizim egasi) qolishi kerak' });
       }
     }
 

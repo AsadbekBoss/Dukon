@@ -39,6 +39,12 @@ async function api(path, options = {}) {
   return data;
 }
 
+function homePageFor(rol) {
+  if (rol === 'dev') return '/dev.html';
+  if (rol === 'admin') return '/admin.html';
+  return '/seller.html';
+}
+
 function requireRoleOrRedirect(role) {
   const user = getUser();
   const token = getToken();
@@ -46,8 +52,9 @@ function requireRoleOrRedirect(role) {
     window.location.href = '/index.html';
     return null;
   }
-  if (user.rol !== role) {
-    window.location.href = user.rol === 'admin' ? '/admin.html' : '/seller.html';
+  // "dev" — barcha panellarga kira oladi, faqat o'z sahifasidan boshqasiga majburlab yo'naltirilmaydi
+  if (user.rol !== role && user.rol !== 'dev') {
+    window.location.href = homePageFor(user.rol);
     return null;
   }
   return user;

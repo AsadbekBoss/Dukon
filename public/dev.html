@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dev Panel — Do'kon Nazorat Tizimi</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="app-header" style="background: linear-gradient(120deg, #0f172a, #334155 60%, #0ea5e9 150%);">
+    <h1>🛠️ Do'kon Nazorat — Dev Panel</h1>
+    <div class="user-box">
+      <span id="userName"></span>
+      <button class="btn-secondary btn-sm" id="logoutBtn">Chiqish</button>
+    </div>
+  </header>
+
+  <nav class="app-tabs">
+    <button class="tab-btn active" data-tab="overview">Umumiy</button>
+    <button class="tab-btn" data-tab="users">Foydalanuvchilar</button>
+    <button class="tab-btn" data-tab="products">Mahsulotlar</button>
+    <button class="tab-btn" data-tab="categories">Kategoriyalar</button>
+    <button class="tab-btn" data-tab="sales">Sotuvlar</button>
+  </nav>
+
+  <main class="app-main">
+
+    <!-- ==================== UMUMIY ==================== -->
+    <section id="tab-overview" class="tab-panel active">
+      <div class="stat-grid" id="overviewGrid"></div>
+      <div class="card">
+        <h2>Tizim haqida</h2>
+        <div class="table-wrap">
+          <table>
+            <tbody id="systemInfoBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== FOYDALANUVCHILAR ==================== -->
+    <section id="tab-users" class="tab-panel">
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Yangi foydalanuvchi qo'shish</h2>
+          <button class="btn-sm btn-secondary" id="toggleUserForm">Formani ko'rsatish</button>
+        </div>
+        <form id="userForm" class="hidden">
+          <input type="hidden" id="userId" />
+          <div class="form-grid">
+            <div>
+              <label for="u_ism">To'liq ism</label>
+              <input type="text" id="u_ism" required />
+            </div>
+            <div>
+              <label for="u_login">Login</label>
+              <input type="text" id="u_login" required />
+            </div>
+            <div>
+              <label for="u_parol">Parol <span id="parolHint" style="font-weight:400"></span></label>
+              <input type="password" id="u_parol" />
+            </div>
+            <div>
+              <label for="u_rol">Rol</label>
+              <select id="u_rol">
+                <option value="sotuvchi">Sotuvchi</option>
+                <option value="admin">Admin</option>
+                <option value="dev">Dev (tizim egasi)</option>
+              </select>
+            </div>
+          </div>
+          <div id="userError" class="error-msg"></div>
+          <div style="display:flex; gap:8px;">
+            <button type="submit" id="userSubmitBtn">Saqlash</button>
+            <button type="button" class="btn-secondary" id="cancelUserEdit">Bekor qilish</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Barcha foydalanuvchilar</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Ism</th><th>Login</th><th>Rol</th><th>Yaratilgan</th><th>Amallar</th></tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== MAHSULOTLAR (xom ma'lumot) ==================== -->
+    <section id="tab-products" class="tab-panel">
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Barcha mahsulotlar (xom ma'lumot)</h2>
+          <button class="btn-sm export-btn" id="exportProductsCsv">⬇ CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Nomi</th><th>Kategoriya</th><th>Guruh</th><th>Tannarx</th>
+                <th>Sotish narxi</th><th>Qoldiq</th><th>Min qoldiq</th><th>Rasm</th><th>Yaratilgan</th>
+              </tr>
+            </thead>
+            <tbody id="productsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== KATEGORIYALAR (xom ma'lumot) ==================== -->
+    <section id="tab-categories" class="tab-panel">
+      <div class="card">
+        <h2>Barcha kategoriyalar (xom ma'lumot)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Nomi</th><th>Belgi</th><th>Rasm</th><th>Mahsulot soni</th><th>Yaratilgan</th></tr>
+            </thead>
+            <tbody id="categoriesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SOTUVLAR (xom ma'lumot) ==================== -->
+    <section id="tab-sales" class="tab-panel">
+      <div class="card">
+        <div class="card-row">
+          <h2 style="margin:0">Barcha sotuvlar (xom ma'lumot, oxirgi 500 ta)</h2>
+          <button class="btn-sm export-btn" id="exportSalesCsv">⬇ CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Sana</th><th>Mahsulot</th><th>Sotuvchi</th><th>Miqdor</th>
+                <th>Narx/dona</th><th>Jami</th><th>Buyurtma ID</th>
+              </tr>
+            </thead>
+            <tbody id="salesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="hint">Do'kon Nazorat Tizimi — Dev Panel (faqat tizim egasi uchun)</footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/dev.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
   const user = requireRoleOrRedirect('admin');
   if (!user) return;
 
-  document.getElementById('userName').textContent = `${user.ism} (admin)`;
+  document.getElementById('userName').textContent = `${user.ism} (${user.rol})`;
   document.getElementById('logoutBtn').addEventListener('click', () => {
     clearSession();
     window.location.href = '/index.html';
@@ -1019,19 +1019,24 @@
     const data = await api('/users');
     const body = document.getElementById('usersBody');
     body.innerHTML = data.users
-      .map(
-        (u) => `
+      .map((u) => {
+        const tegishOlmasin = u.rol === 'dev' && user.rol !== 'dev';
+        return `
         <tr>
           <td>${escapeHtml(u.ism)}</td>
           <td>${escapeHtml(u.login)}</td>
           <td><span class="badge ${u.rol}">${u.rol}</span></td>
           <td>${sanaFormat(u.created_at)}</td>
           <td class="actions-cell">
-            <button class="btn-sm btn-secondary" data-edit="${u.id}">Tahrirlash</button>
-            <button class="btn-sm btn-danger" data-del="${u.id}">O'chirish</button>
+            ${
+              tegishOlmasin
+                ? '<span style="color:var(--muted); font-size:12px">Tizim egasi</span>'
+                : `<button class="btn-sm btn-secondary" data-edit="${u.id}">Tahrirlash</button>
+                   <button class="btn-sm btn-danger" data-del="${u.id}">O'chirish</button>`
+            }
           </td>
-        </tr>`
-      )
+        </tr>`;
+      })
       .join('');
 
     body.querySelectorAll('[data-edit]').forEach((btn) => {

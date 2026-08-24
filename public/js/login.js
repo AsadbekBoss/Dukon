@@ -2,7 +2,7 @@
   const existing = getUser();
   const existingToken = getToken();
   if (existing && existingToken) {
-    window.location.href = existing.rol === 'admin' ? '/admin.html' : '/seller.html';
+    window.location.href = homePageFor(existing.rol);
     return;
   }
 
@@ -25,7 +25,7 @@
         body: JSON.stringify({ login, parol }),
       });
       setSession(data.token, data.user);
-      window.location.href = data.user.rol === 'admin' ? '/admin.html' : '/seller.html';
+      window.location.href = homePageFor(data.user.rol);
     } catch (err) {
       errorBox.textContent = err.message;
       errorBox.classList.add('show');

@@ -4,9 +4,22 @@ const { hashPassword } = require('./utils/auth');
 async function seed() {
   await db.ensureMigrated();
 
-  const userSoni = (await db.get('SELECT COUNT(*) AS soni FROM users')).soni;
+  const devSoni = (await db.get("SELECT COUNT(*) AS soni FROM users WHERE rol = 'dev'")).soni;
+  if (devSoni === 0) {
+    await db.run('INSERT INTO users (ism, login, parol_hash, rol) VALUES (?, ?, ?, ?)', [
+      'Tizim egasi',
+      'dev',
+      hashPassword('dev12345'),
+      'dev',
+    ]);
+    console.log('✔ Dev foydalanuvchi yaratildi -> login: dev, parol: dev12345');
+  } else {
+    console.log('ℹ Dev foydalanuvchi allaqachon mavjud.');
+  }
 
-  if (userSoni === 0) {
+  const oddiyUserSoni = (await db.get("SELECT COUNT(*) AS soni FROM users WHERE rol != 'dev'")).soni;
+
+  if (oddiyUserSoni === 0) {
     await db.run('INSERT INTO users (ism, login, parol_hash, rol) VALUES (?, ?, ?, ?)', [
       'Administrator',
       'admin',

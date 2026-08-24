@@ -2,7 +2,7 @@
   const user = requireRoleOrRedirect('sotuvchi');
   if (!user) return;
 
-  document.getElementById('userName').textContent = `${user.ism} (sotuvchi)`;
+  document.getElementById('userName').textContent = `${user.ism} (${user.rol})`;
   document.getElementById('logoutBtn').addEventListener('click', () => {
     clearSession();
     window.location.href = '/index.html';

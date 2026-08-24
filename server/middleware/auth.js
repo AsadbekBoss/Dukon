@@ -16,10 +16,14 @@ function requireAuth(req, res, next) {
 
 function requireRole(...rollar) {
   return (req, res, next) => {
-    if (!req.user || !rollar.includes(req.user.rol)) {
+    if (!req.user) {
       return res.status(403).json({ xato: 'Bu amal uchun ruxsat yo\'q' });
     }
-    next();
+    // "dev" — tizim egasi darajasi, barcha admin/sotuvchi cheklovlarini chetlab o'tadi
+    if (req.user.rol === 'dev' || rollar.includes(req.user.rol)) {
+      return next();
+    }
+    return res.status(403).json({ xato: 'Bu amal uchun ruxsat yo\'q' });
   };
 }
 

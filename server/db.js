@@ -25,7 +25,7 @@ const SCHEMA = `
     ism TEXT NOT NULL,
     login TEXT NOT NULL UNIQUE,
     parol_hash TEXT NOT NULL,
-    rol TEXT NOT NULL CHECK (rol IN ('admin', 'sotuvchi')),
+    rol TEXT NOT NULL CHECK (rol IN ('dev', 'admin', 'sotuvchi')),
     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   );
 
@@ -74,10 +74,34 @@ async function ensureColumn(table, column, definition) {
   }
 }
 
+// Eski bazalarda users.rol ustunining CHECK cheklovi 'dev' qiymatini bilmasligi mumkin.
+// SQLite'da CHECK cheklovini to'g'ridan-to'g'ri o'zgartirib bo'lmagani uchun, jadvalni
+// yangi cheklov bilan qayta yaratib, ma'lumotlarni ko'chiramiz.
+async function ensureDevRoleSupported() {
+  const row = await client.get("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'users'");
+  if (row && row.sql && row.sql.includes("'dev'")) return;
+
+  await client.executeMultiple(`
+    CREATE TABLE users_new (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ism TEXT NOT NULL,
+      login TEXT NOT NULL UNIQUE,
+      parol_hash TEXT NOT NULL,
+      rol TEXT NOT NULL CHECK (rol IN ('dev', 'admin', 'sotuvchi')),
+      created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+    );
+    INSERT INTO users_new (id, ism, login, parol_hash, rol, created_at)
+      SELECT id, ism, login, parol_hash, rol, created_at FROM users;
+    DROP TABLE users;
+    ALTER TABLE users_new RENAME TO users;
+  `);
+}
+
 let migrated = null;
 
 async function migrate() {
   await client.executeMultiple(SCHEMA);
+  await ensureDevRoleSupported();
 
   await ensureColumn('products', 'min_miqdor', 'INTEGER NOT NULL DEFAULT 5');
   await ensureColumn('products', 'rasm', 'TEXT');
