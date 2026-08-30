@@ -196,6 +196,7 @@
       renderCart();
       document.getElementById('cartPanel').classList.add('hidden');
       await loadProducts();
+      loadFrequentlySold().catch(console.error);
       printCombinedReceipt(res.sales);
     } catch (err) {
       showToast(err.message, 'error');
@@ -274,6 +275,59 @@
         }
         const product = productsCache.find((p) => p.id === pid);
         if (product) addToCart(product, miqdor);
+      });
+    });
+  }
+
+  // Sotuvchining o'zi eng ko'p sotgan mahsulotlarini tezkor panelga chiqaradi —
+  // qidiruv yoki kategoriya ichiga kirmasdan bir bosishda savatga qo'shish uchun
+  async function loadFrequentlySold() {
+    const data = await api('/sales/mine');
+    const totals = new Map(); // product_id -> jami sotilgan soni
+
+    for (const s of data.sales) {
+      if (!s.product_id) continue;
+      totals.set(s.product_id, (totals.get(s.product_id) || 0) + s.miqdor);
+    }
+
+    const top = [...totals.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([pid, soni]) => {
+        const product = productsCache.find((p) => p.id === pid);
+        return product && product.miqdor > 0 ? { product, soni } : null;
+      })
+      .filter(Boolean);
+
+    const section = document.getElementById('frequentSection');
+    const row = document.getElementById('frequentRow');
+
+    if (!top.length) {
+      section.classList.add('hidden');
+      return;
+    }
+
+    section.classList.remove('hidden');
+    row.innerHTML = top
+      .map(({ product: p, soni }) => {
+        const photo = p.rasm
+          ? `<img class="thumb" src="${p.rasm}" alt="${escapeHtml(p.nomi)}" />`
+          : `<div class="thumb-placeholder">📦</div>`;
+        return `
+        <div class="frequent-chip" data-freq-add="${p.id}">
+          ${photo}
+          <div class="name">${escapeHtml(p.nomi)}</div>
+          <div class="price">${pul(p.sotish_narxi)}</div>
+          <div class="soni-badge">${soni} marta sotilgan</div>
+        </div>`;
+      })
+      .join('');
+
+    row.querySelectorAll('[data-freq-add]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const pid = Number(el.dataset.freqAdd);
+        const product = productsCache.find((p) => p.id === pid);
+        if (product) addToCart(product, 1);
       });
     });
   }
@@ -363,7 +417,10 @@
   });
 
   // ---------- Boshlash ----------
-  loadProducts();
+  (async () => {
+    await loadProducts();
+    loadFrequentlySold().catch(console.error);
+  })();
   loadCategories();
   loadMySales(currentPeriod);
 })();

@@ -17,8 +17,8 @@ router.get(
     const params = [];
 
     if (q && String(q).trim()) {
-      shartlar.push('(nomi LIKE ? OR kategoriya LIKE ?)');
-      params.push(`%${q}%`, `%${q}%`);
+      shartlar.push('(nomi LIKE ? OR kategoriya LIKE ? OR ichki_guruh LIKE ?)');
+      params.push(`%${q}%`, `%${q}%`, `%${q}%`);
     }
     if (category && String(category).trim()) {
       shartlar.push('kategoriya = ?');
