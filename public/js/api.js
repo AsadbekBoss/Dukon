@@ -162,13 +162,34 @@ function openBarcodeScanner(onDetected) {
         <button type="button" class="btn-sm btn-secondary" id="scannerCloseBtn">✕ Yopish</button>
       </div>
       <div id="scanner-region"></div>
-      <p class="scanner-hint">Mahsulot shtrix-kodini kamera oldiga tuting</p>
+      <p class="scanner-hint">Kodni ramka ichiga, yorug'roq joyda va kamerani sal uzoqroq tutib, fokusga tushirilsin</p>
+      <div class="scanner-controls">
+        <button type="button" class="btn-sm btn-secondary" id="scannerTorchBtn" style="display:none">🔦 Chiroq</button>
+      </div>
+      <div class="scanner-manual">
+        <input type="text" id="scannerManualInput" placeholder="Yoki kodni qo'lda kiriting..." />
+        <button type="button" class="btn-sm" id="scannerManualBtn">OK</button>
+      </div>
     </div>
   `;
   document.body.appendChild(overlay);
 
-  const html5QrCode = new Html5Qrcode('scanner-region');
+  const html5QrCode = new Html5Qrcode('scanner-region', {
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_E,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.CODABAR,
+      Html5QrcodeSupportedFormats.ITF,
+      Html5QrcodeSupportedFormats.QR_CODE,
+    ],
+    verbose: false,
+  });
   let stopped = false;
+  let torchOn = false;
 
   function cleanup() {
     if (stopped) return;
@@ -181,18 +202,57 @@ function openBarcodeScanner(onDetected) {
 
   overlay.querySelector('#scannerCloseBtn').addEventListener('click', cleanup);
 
+  function submitManual() {
+    const val = overlay.querySelector('#scannerManualInput').value.trim();
+    if (!val) return;
+    cleanup();
+    onDetected(val);
+  }
+  overlay.querySelector('#scannerManualBtn').addEventListener('click', submitManual);
+  overlay.querySelector('#scannerManualInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); submitManual(); }
+  });
+
   html5QrCode
     .start(
       { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 260, height: 160 } },
+      {
+        fps: 20,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+          const w = Math.min(viewfinderWidth * 0.85, 420);
+          return { width: w, height: Math.round(w * 0.45) };
+        },
+        aspectRatio: 1.777,
+        disableFlip: false,
+        videoConstraints: {
+          facingMode: 'environment',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          advanced: [{ focusMode: 'continuous' }],
+        },
+      },
       (decodedText) => {
         cleanup();
         onDetected(decodedText);
       },
       () => {} // har bir freymda topilmasa xato beradi — e'tiborsiz qoldiramiz
     )
+    .then(() => {
+      const torchBtn = overlay.querySelector('#scannerTorchBtn');
+      const capabilities = html5QrCode.getRunningTrackCameraCapabilities?.();
+      if (capabilities && capabilities.torchFeature && capabilities.torchFeature().isSupported()) {
+        torchBtn.style.display = '';
+        torchBtn.addEventListener('click', () => {
+          torchOn = !torchOn;
+          capabilities.torchFeature().apply(torchOn).catch(() => {});
+          torchBtn.textContent = torchOn ? '🔦 O\'chirish' : '🔦 Chiroq';
+        });
+      }
+    })
     .catch(() => {
       showToast("Kameraga ruxsat berilmadi yoki topilmadi", 'error');
       overlay.remove();
     });
+
+  setTimeout(() => overlay.querySelector('#scannerManualInput')?.focus(), 300);
 }

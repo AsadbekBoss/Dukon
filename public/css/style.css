@@ -1179,6 +1179,24 @@ footer.hint {
   margin: 12px 0 0;
 }
 
+.scanner-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.scanner-manual {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.scanner-manual input {
+  flex: 1;
+}
+
 /* ---------- Savat (cart) paneli ---------- */
 body.has-cart .app-main { padding-bottom: 110px; }
 
