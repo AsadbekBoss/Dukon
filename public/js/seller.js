@@ -349,6 +349,20 @@
   });
   document.getElementById('productCategoryFilter').addEventListener('change', () => loadProducts());
 
+  document.getElementById('scanBarcodeBtn').addEventListener('click', () => {
+    openBarcodeScanner(async (code) => {
+      try {
+        const data = await api(`/products/barcode/${encodeURIComponent(code)}`);
+        document.getElementById('productSearch').value = data.product.nomi;
+        document.getElementById('productCategoryFilter').value = '';
+        await loadProducts();
+        showToast(`Topildi: ${data.product.nomi}`);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+  });
+
   // ==================================================
   // MENING SOTUVLARIM
   // ==================================================

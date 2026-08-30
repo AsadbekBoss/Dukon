@@ -144,3 +144,55 @@ function sanaFormat(iso) {
     minute: '2-digit',
   });
 }
+
+// Shtrix-kod skaneri: kamerani ochib, kod topilganda onDetected(kod) ni chaqiradi.
+// html5-qrcode kutubxonasi CDN orqali yuklanadi (public/*.html fayllarida <script> tegi bilan).
+function openBarcodeScanner(onDetected) {
+  if (typeof Html5Qrcode === 'undefined') {
+    showToast("Skaner kutubxonasi yuklanmadi — internet aloqasini tekshiring", 'error');
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'scanner-overlay';
+  overlay.innerHTML = `
+    <div class="scanner-box">
+      <div class="scanner-header">
+        <h3 style="margin:0">📷 Shtrix-kodni skanerlang</h3>
+        <button type="button" class="btn-sm btn-secondary" id="scannerCloseBtn">✕ Yopish</button>
+      </div>
+      <div id="scanner-region"></div>
+      <p class="scanner-hint">Mahsulot shtrix-kodini kamera oldiga tuting</p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const html5QrCode = new Html5Qrcode('scanner-region');
+  let stopped = false;
+
+  function cleanup() {
+    if (stopped) return;
+    stopped = true;
+    html5QrCode
+      .stop()
+      .catch(() => {})
+      .finally(() => overlay.remove());
+  }
+
+  overlay.querySelector('#scannerCloseBtn').addEventListener('click', cleanup);
+
+  html5QrCode
+    .start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 260, height: 160 } },
+      (decodedText) => {
+        cleanup();
+        onDetected(decodedText);
+      },
+      () => {} // har bir freymda topilmasa xato beradi — e'tiborsiz qoldiramiz
+    )
+    .catch(() => {
+      showToast("Kameraga ruxsat berilmadi yoki topilmadi", 'error');
+      overlay.remove();
+    });
+}

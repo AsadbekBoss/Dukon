@@ -45,18 +45,31 @@ router.get(
   })
 );
 
+// Shtrix-kod bo'yicha mahsulotni topish (skanerlash uchun)
+router.get(
+  '/barcode/:code',
+  asyncHandler(async (req, res) => {
+    const code = String(req.params.code || '').trim();
+    if (!code) return res.status(400).json({ xato: "Shtrix-kod bo'sh" });
+    const product = await db.get('SELECT * FROM products WHERE shtrix_kod = ?', [code]);
+    if (!product) return res.status(404).json({ xato: 'Bu shtrix-kodga ega mahsulot topilmadi' });
+    res.json({ product });
+  })
+);
+
 // Mahsulotlar ro'yxatini CSV (Excel) shaklida yuklab olish
 router.get(
   '/export/csv',
   requireRole('admin'),
   asyncHandler(async (req, res) => {
     const products = await db.all('SELECT * FROM products ORDER BY nomi ASC');
-    const headers = ['ID', 'Nomi', 'Kategoriya', 'Ichki guruh', 'Tannarx', 'Sotish narxi', 'Foyda/dona', 'Qoldiq', 'Min qoldiq'];
+    const headers = ['ID', 'Nomi', 'Kategoriya', 'Ichki guruh', 'Shtrix-kod', 'Tannarx', 'Sotish narxi', 'Foyda/dona', 'Qoldiq', 'Min qoldiq'];
     const rows = products.map((p) => [
       p.id,
       p.nomi,
       p.kategoriya || '',
       p.ichki_guruh || '',
+      p.shtrix_kod || '',
       p.tannarx,
       p.sotish_narxi,
       p.sotish_narxi - p.tannarx,
@@ -80,7 +93,7 @@ router.post(
   '/',
   requireRole('admin'),
   asyncHandler(async (req, res) => {
-    const { nomi, tannarx, sotish_narxi, miqdor, kategoriya, min_miqdor, rasm, ichki_guruh } = req.body || {};
+    const { nomi, tannarx, sotish_narxi, miqdor, kategoriya, min_miqdor, rasm, ichki_guruh, shtrix_kod } = req.body || {};
     if (!nomi || tannarx == null || sotish_narxi == null) {
       return res.status(400).json({ xato: 'Nomi, tannarx va sotish narxi kiritilishi shart' });
     }
@@ -94,9 +107,14 @@ router.post(
     if (rasm && !String(rasm).startsWith('data:image/')) {
       return res.status(400).json({ xato: "Rasm formati noto'g'ri" });
     }
+    const barcode = (shtrix_kod || '').trim() || null;
+    if (barcode) {
+      const exists = await db.get('SELECT id FROM products WHERE shtrix_kod = ?', [barcode]);
+      if (exists) return res.status(409).json({ xato: 'Bu shtrix-kod boshqa mahsulotda band' });
+    }
     const info = await db.run(
-      'INSERT INTO products (nomi, tannarx, sotish_narxi, miqdor, kategoriya, min_miqdor, rasm, ichki_guruh) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [nomi, tn, sn, mq, kategoriya || null, minMq, rasm || null, (ichki_guruh || '').trim() || null]
+      'INSERT INTO products (nomi, tannarx, sotish_narxi, miqdor, kategoriya, min_miqdor, rasm, ichki_guruh, shtrix_kod) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [nomi, tn, sn, mq, kategoriya || null, minMq, rasm || null, (ichki_guruh || '').trim() || null, barcode]
     );
     const product = await db.get('SELECT * FROM products WHERE id = ?', [info.lastInsertRowid]);
     res.status(201).json({ product });
@@ -111,7 +129,7 @@ router.put(
     const target = await db.get('SELECT * FROM products WHERE id = ?', [id]);
     if (!target) return res.status(404).json({ xato: 'Mahsulot topilmadi' });
 
-    const { nomi, tannarx, sotish_narxi, miqdor, kategoriya, min_miqdor, rasm, ichki_guruh } = req.body || {};
+    const { nomi, tannarx, sotish_narxi, miqdor, kategoriya, min_miqdor, rasm, ichki_guruh, shtrix_kod } = req.body || {};
 
     const yangiNomi = nomi ?? target.nomi;
     const yangiTannarx = tannarx != null ? Number(tannarx) : target.tannarx;
@@ -121,6 +139,7 @@ router.put(
     const yangiMinMiqdor = min_miqdor != null ? Number(min_miqdor) : target.min_miqdor;
     const yangiRasm = rasm !== undefined ? rasm : target.rasm;
     const yangiIchkiGuruh = ichki_guruh !== undefined ? String(ichki_guruh).trim() || null : target.ichki_guruh;
+    const yangiBarcode = shtrix_kod !== undefined ? String(shtrix_kod).trim() || null : target.shtrix_kod;
 
     if ([yangiTannarx, yangiSotishNarxi, yangiMiqdor, yangiMinMiqdor].some((v) => Number.isNaN(v) || v < 0)) {
       return res.status(400).json({ xato: 'Raqamli qiymatlar noto\'g\'ri' });
@@ -128,10 +147,14 @@ router.put(
     if (yangiRasm && !String(yangiRasm).startsWith('data:image/')) {
       return res.status(400).json({ xato: "Rasm formati noto'g'ri" });
     }
+    if (yangiBarcode && yangiBarcode !== target.shtrix_kod) {
+      const exists = await db.get('SELECT id FROM products WHERE shtrix_kod = ? AND id != ?', [yangiBarcode, id]);
+      if (exists) return res.status(409).json({ xato: 'Bu shtrix-kod boshqa mahsulotda band' });
+    }
 
     await db.run(
-      'UPDATE products SET nomi = ?, tannarx = ?, sotish_narxi = ?, miqdor = ?, kategoriya = ?, min_miqdor = ?, rasm = ?, ichki_guruh = ? WHERE id = ?',
-      [yangiNomi, yangiTannarx, yangiSotishNarxi, yangiMiqdor, yangiKategoriya, yangiMinMiqdor, yangiRasm, yangiIchkiGuruh, id]
+      'UPDATE products SET nomi = ?, tannarx = ?, sotish_narxi = ?, miqdor = ?, kategoriya = ?, min_miqdor = ?, rasm = ?, ichki_guruh = ?, shtrix_kod = ? WHERE id = ?',
+      [yangiNomi, yangiTannarx, yangiSotishNarxi, yangiMiqdor, yangiKategoriya, yangiMinMiqdor, yangiRasm, yangiIchkiGuruh, yangiBarcode, id]
     );
 
     const product = await db.get('SELECT * FROM products WHERE id = ?', [id]);

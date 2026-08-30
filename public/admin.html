@@ -214,6 +214,12 @@
               <label for="p_ichki_guruh">Ichki guruh (ixtiyoriy) — masalan "Ruchkalar"</label>
               <input type="text" id="p_ichki_guruh" list="subgroupDatalist" placeholder="Bir xil turdagi mahsulotlarni guruhlash uchun" />
               <datalist id="subgroupDatalist"></datalist>
+
+              <label for="p_shtrix_kod">Shtrix-kod (ixtiyoriy)</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="p_shtrix_kod" placeholder="Shtrix-kod raqami" style="flex:1" />
+                <button type="button" class="btn-sm btn-secondary" id="p_shtrix_scan_btn">📷 Skanerlash</button>
+              </div>
             </div>
 
             <!-- 3. Narx -->
@@ -319,6 +325,7 @@
 
   <footer class="hint">Do'kon Nazorat Tizimi — barcha ma'lumotlar lokal SQLite bazasida saqlanadi</footer>
 
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/admin.js"></script>
 </body>

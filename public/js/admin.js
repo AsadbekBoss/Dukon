@@ -349,6 +349,13 @@
 
   document.getElementById('p_kategoriya').addEventListener('input', (e) => updateSubgroupDatalist(e.target.value.trim()));
 
+  document.getElementById('p_shtrix_scan_btn').addEventListener('click', () => {
+    openBarcodeScanner((code) => {
+      document.getElementById('p_shtrix_kod').value = code;
+      showToast('Shtrix-kod aniqlandi: ' + code);
+    });
+  });
+
   document.getElementById('cancelProductEdit').addEventListener('click', () => {
     resetProductForm();
     productForm.classList.add('hidden');
@@ -371,6 +378,7 @@
     document.getElementById('p_nomi').value = p.nomi;
     document.getElementById('p_kategoriya').value = p.kategoriya || '';
     document.getElementById('p_ichki_guruh').value = p.ichki_guruh || '';
+    document.getElementById('p_shtrix_kod').value = p.shtrix_kod || '';
     document.getElementById('p_tannarx').value = p.tannarx;
     document.getElementById('p_foiz').value = '';
     document.getElementById('p_sotish').value = p.sotish_narxi;
@@ -393,6 +401,7 @@
       nomi: document.getElementById('p_nomi').value.trim(),
       kategoriya: document.getElementById('p_kategoriya').value.trim(),
       ichki_guruh: document.getElementById('p_ichki_guruh').value.trim(),
+      shtrix_kod: document.getElementById('p_shtrix_kod').value.trim(),
       tannarx: Number(document.getElementById('p_tannarx').value),
       sotish_narxi: Number(document.getElementById('p_sotish').value),
       miqdor: Number(document.getElementById('p_miqdor').value),

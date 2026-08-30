@@ -108,6 +108,7 @@ async function migrate() {
   await ensureColumn('products', 'ichki_guruh', 'TEXT');
   await ensureColumn('categories', 'rasm', 'TEXT');
   await ensureColumn('sales', 'buyurtma_id', 'TEXT');
+  await ensureColumn('products', 'shtrix_kod', 'TEXT');
 
   // Mahsulotlarda ishlatilgan, lekin categories jadvalida hali yo'q nomlarni ko'chirib qo'yish
   await client.execute(`
