@@ -952,6 +952,7 @@ tr:last-child td { border-bottom: none; }
   height: 100%;
   object-fit: cover;
   display: block;
+  cursor: zoom-in;
   transition: transform 0.35s ease;
 }
 

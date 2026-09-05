@@ -8,6 +8,25 @@
     window.location.href = '/index.html';
   });
 
+  // ---------- Mahsulot rasmini kattalashtirib ko'rsatish ----------
+  function openImageLightbox(src, alt) {
+    const overlay = document.createElement('div');
+    overlay.className = 'image-lightbox';
+    overlay.innerHTML = `
+      <button type="button" class="image-lightbox-close" aria-label="Yopish">✕</button>
+      <img src="${src}" alt="${escapeHtml(alt || '')}" />
+    `;
+    overlay.addEventListener('click', () => overlay.remove());
+    document.body.appendChild(overlay);
+  }
+
+  document.addEventListener('click', (e) => {
+    const img = e.target.closest('.product-card-photo img');
+    if (!img) return;
+    e.stopPropagation();
+    openImageLightbox(img.src, img.alt);
+  });
+
   // ---------- Tab almashtirish ----------
   const tabBtns = document.querySelectorAll('.tab-btn');
   const panels = document.querySelectorAll('.tab-panel');

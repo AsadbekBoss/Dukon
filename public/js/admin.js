@@ -33,7 +33,7 @@
   }
 
   document.addEventListener('click', (e) => {
-    const img = e.target.closest('.category-card-photo img');
+    const img = e.target.closest('.category-card-photo img, .product-card-photo img');
     if (!img) return;
     e.stopPropagation();
     openImageLightbox(img.src, img.alt);
